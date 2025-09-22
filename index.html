@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Business Savings Tracker</title>
+<link rel="icon" href="home-savings.png" type="image/png" />
+
+  <style>
+    :root {
+      --primary: #635bff;
+      --background: #f6f9fc;
+      --card-bg: #ffffff;
+      --text: #2d3748;
+      --muted: #718096;
+      --success: #00b87c;
+      --danger: #ff4d4f;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+    }
+
+    nav {
+      background-color: var(--card-bg);
+      padding: 16px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    nav button {
+      margin: 0 12px;
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 40px auto;
+      padding: 30px;
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: var(--primary);
+    }
+
+    label {
+      font-weight: 600;
+      margin-top: 20px;
+      display: block;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button.action {
+      margin-top: 12px;
+      width: 100%;
+      padding: 12px;
+      background-color: var(--primary);
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button.action:hover {
+      background-color: #4c44d4;
+    }
+
+    .status {
+      margin-top: 30px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .card {
+      background-color: var(--background);
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 20px;
+      color: var(--text);
+    }
+
+    .card p {
+      margin: 8px 0;
+      font-size: 18px;
+      color: var(--muted);
+    }
+
+    .footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .page {
+      display: none;
+    }
+
+    .active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <button onclick="showPage('home')">Home</button>
+    <button onclick="showPage('tracker')">Tracker</button>
+    <button onclick="showPage('about')">About</button>
+  </nav>
+
+  <!-- Home Page -->
+  <div id="home" class="container page active">
+    <h1>Welcome to Your Insurance Savings Hub</h1>
+    <p>This site helps you and your friend save smartly for your future business insurance. Track deposits, withdrawals, borrowed funds, and repayments—all in one place.</p>
+
+    <div class="card">
+      <h2>💰 Current Summary</h2>
+      <p id="homeBalance">Balance: ₦0</p>
+      <p id="homeBorrowed">Borrowed: ₦0</p>
+    </div>
+
+    <button class="action" onclick="showPage('tracker')">Go to Tracker</button>
+  </div>
+
+  <!-- Tracker Page -->
+  <div id="tracker" class="container page">
+    <h1>💼 Savings Tracker</h1>
+
+    <label for="deposit">Deposit (₦):</label>
+    <input type="number" id="deposit" placeholder="e.g. 10000" />
+    <button class="action" onclick="deposit()">Add Deposit</button>
+
+    <label for="withdraw">Withdraw (₦):</label>
+    <input type="number" id="withdraw" placeholder="e.g. 5000" />
+    <button class="action" onclick="withdraw()">Withdraw</button>
+
+    <label for="borrow">Borrow (₦):</label>
+    <input type="number" id="borrow" placeholder="e.g. 20000" />
+    <button class="action" onclick="borrow()">Borrow Money</button>
+
+    <label for="returnBorrowed">Return Borrowed (₦):</label>
+    <input type="number" id="returnBorrowed" placeholder="e.g. 10000" />
+    <button class="action" onclick="returnBorrowed()">Return Money</button>
+
+    <div class="status" id="status">
+      Balance: ₦0<br>
+      Borrowed: ₦0
+    </div>
+  </div>
+
+  <!-- About Page -->
+  <div id="about" class="container page">
+    <h1>About Us</h1>
+    <p>We’re two future entrepreneurs from Akure, Nigeria, building a business with purpose. This site helps us save for insurance so we can launch with confidence and security.</p>
+    <p>Built by Ibukunolwa & Friend 💡</p>
+  </div>
+
+  <div class="footer">
+    © 2025 Insurance Savings Tracker
+  </div>
+
+  <script>
+    let balance = 0;
+    let borrowed = 0;
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+      });
+      document.getElementById(pageId).classList.add('active');
+      updateHomeCard();
+    }
+
+    function updateStatus() {
+      document.getElementById("status").innerHTML = `
+        Balance: ₦${balance}<br>
+        Borrowed: ₦${borrowed}
+      `;
+      updateHomeCard();
+    }
+
+    function updateHomeCard() {
+      document.getElementById("homeBalance").textContent = `Balance: ₦${balance}`;
+      document.getElementById("homeBorrowed").textContent = `Borrowed: ₦${borrowed}`;
+    }
+
+    function deposit() {
+      const amount = parseInt(document.getElementById("deposit").value);
+      if (!isNaN(amount) && amount > 0) {
+        balance += amount;
+        updateStatus();
+      }
+    }
+
+    function withdraw() {
+      const amount = parseInt(document.getElementById("withdraw").value);
+      if (!isNaN(amount) && amount > 0 && amount <= balance) {
+        balance -= amount;
+        updateStatus();
+      } else {
+        alert("Insufficient balance or invalid amount.");
+      }
+    }
+
+    function borrow() {
+      const amount = parseInt(document.getElementById("borrow").value);
+      if (!isNaN(amount) && amount > 0) {
+        borrowed += amount;
+        balance += amount;
+        updateStatus();
+      }
+    }
+
+    function returnBorrowed() {
+      const amount = parseInt(document.getElementById("returnBorrowed").value);
+      if (!isNaN(amount) && amount > 0 && amount <= borrowed && amount <= balance) {
+        borrowed -= amount;
+        balance -= amount;
+        updateStatus();
+      } else {
+        alert("Invalid return amount or insufficient balance.");
+      }
+    }
+  </script>
+</body>
+</html>
